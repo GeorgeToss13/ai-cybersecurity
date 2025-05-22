@@ -47,6 +47,80 @@ class CybersecurityAITester:
         except Exception as e:
             print(f"❌ Failed - Error: {str(e)}")
             return False, {}
+            
+    def test_person_search(self, name):
+        """Test person search API"""
+        print(f"\n🔍 Testing Person Search API for '{name}'...")
+        success, response = self.run_test(
+            f"Person Search for '{name}'",
+            "POST",
+            "search/person",
+            200,
+            data={"name": name}
+        )
+        
+        if not success:
+            return False
+        
+        # Check if response has the expected structure
+        if 'personal_info' not in response:
+            print("❌ Failed - Response missing 'personal_info' section")
+            return False
+        
+        # Check if personal_info has the expected fields
+        personal_info = response['personal_info']
+        expected_fields = ['name', 'summary']
+        for field in expected_fields:
+            if field not in personal_info:
+                print(f"❌ Failed - 'personal_info' missing '{field}' field")
+                return False
+        
+        # Check if the response has the expected sections
+        expected_sections = [
+            'personal_info',
+            'social_profiles',
+            'professional_info',
+            'articles',
+            'mentions'
+        ]
+        
+        for section in expected_sections:
+            if section in response:
+                print(f"✅ Section '{section}' found in response")
+            else:
+                print(f"⚠️ Section '{section}' not found in response")
+        
+        # Check if personal_info has the expected subsections
+        expected_subsections = [
+            'possible_locations',
+            'possible_occupations',
+            'possible_education',
+            'possible_social_media',
+            'possible_emails',
+            'possible_websites',
+            'possible_phone_numbers'
+        ]
+        
+        for subsection in expected_subsections:
+            if subsection in personal_info:
+                print(f"✅ Subsection '{subsection}' found in personal_info")
+                if isinstance(personal_info[subsection], list) and len(personal_info[subsection]) > 0:
+                    print(f"  - Contains {len(personal_info[subsection])} items")
+            else:
+                print(f"⚠️ Subsection '{subsection}' not found in personal_info")
+        
+        # Print a sample of the data
+        print("\n📊 Sample of person search results:")
+        print(f"Name: {personal_info.get('name', 'N/A')}")
+        print(f"Summary: {personal_info.get('summary', 'N/A')[:200]}...")
+        
+        if 'possible_locations' in personal_info and personal_info['possible_locations']:
+            print(f"Locations: {', '.join(personal_info['possible_locations'][:3])}")
+        
+        if 'possible_occupations' in personal_info and personal_info['possible_occupations']:
+            print(f"Occupations: {', '.join(personal_info['possible_occupations'][:3])}")
+        
+        return True
 
     def test_root_endpoint(self):
         """Test the root API endpoint"""
