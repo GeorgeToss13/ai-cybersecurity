@@ -277,7 +277,7 @@ def main():
     # Test enhanced person search with well-known figures
     test_names = ["Elon Musk", "Bill Gates"]
     for name in test_names:
-        tester.test_person_search(name)
+        tester.test_enhanced_person_search(name)
     
     # Test chat
     chat_success, chat_data = tester.test_chat()
