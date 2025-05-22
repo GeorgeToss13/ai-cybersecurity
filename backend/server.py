@@ -404,9 +404,97 @@ async def search_command(update, context):
     """Handle /search command"""
     query = ' '.join(context.args)
     if not query:
-        await update.message.reply_text("Please provide a search query. Example: /search vulnerability in Windows 11")
+        await update.message.reply_text("Please provide a search query. Examples:\n/search vulnerability in Windows 11\n/search person:John Smith")
         return
     
+    # Check if it's a person search
+    if query.lower().startswith("person:") or query.lower().startswith("name:"):
+        name = query.split(":", 1)[1].strip()
+        await update.message.reply_text(f"Searching for detailed information about: {name}...")
+        
+        # Process as a person search
+        person_info = await person_search(name)
+        personal_info = person_info["personal_info"]
+        
+        # Create a comprehensive response with all details
+        response = f"📊 Detailed Information about {name}:\n\n"
+        
+        # Add summary if available
+        if personal_info["summary"]:
+            response += f"📝 Summary:\n{personal_info['summary']}\n\n"
+        
+        # Add possible locations
+        if personal_info["possible_locations"]:
+            response += "📍 Possible Locations:\n"
+            for location in personal_info["possible_locations"][:3]:  # Limit to 3 for Telegram
+                response += f"• {location}\n"
+            response += "\n"
+        
+        # Add possible occupations
+        if personal_info["possible_occupations"]:
+            response += "💼 Possible Occupations:\n"
+            for occupation in personal_info["possible_occupations"][:3]:  # Limit to 3 for Telegram
+                response += f"• {occupation}\n"
+            response += "\n"
+        
+        # Add possible education
+        if personal_info["possible_education"]:
+            response += "🎓 Possible Education:\n"
+            for education in personal_info["possible_education"][:3]:  # Limit to 3 for Telegram
+                response += f"• {education}\n"
+            response += "\n"
+        
+        # Add social media profiles
+        if personal_info["possible_social_media"]:
+            response += "🔗 Social Media Presence:\n"
+            for platform in personal_info["possible_social_media"]:
+                response += f"• {platform}\n"
+            response += "\n"
+        
+        # Add possible emails
+        if personal_info["possible_emails"]:
+            response += "📧 Possible Email Addresses:\n"
+            for email in personal_info["possible_emails"][:3]:  # Limit to 3 for Telegram
+                response += f"• {email}\n"
+            response += "\n"
+        
+        # Add possible websites
+        if personal_info["possible_websites"]:
+            response += "🌐 Possible Websites:\n"
+            for website in personal_info["possible_websites"][:3]:  # Limit to 3 for Telegram
+                response += f"• {website}\n"
+            response += "\n"
+        
+        # Add possible phone numbers
+        if personal_info["possible_phone_numbers"]:
+            response += "📱 Possible Phone Numbers:\n"
+            for phone in personal_info["possible_phone_numbers"]:
+                response += f"• {phone}\n"
+            response += "\n"
+        
+        # Add disclaimer
+        response += "⚠️ Note: This information is automatically gathered from public web sources and may not be 100% accurate."
+        
+        # Send response in chunks if it's too long
+        if len(response) > 4000:
+            chunks = [response[i:i+4000] for i in range(0, len(response), 4000)]
+            for chunk in chunks:
+                await update.message.reply_text(chunk)
+        else:
+            await update.message.reply_text(response)
+        
+        # Save search in database
+        search_data = {
+            "id": str(uuid.uuid4()),
+            "user_id": update.effective_user.id,
+            "query": f"Person: {name}",
+            "results": person_info,
+            "timestamp": datetime.utcnow()
+        }
+        await search_results.insert_one(search_data)
+        return
+    
+    # Regular web search
     await update.message.reply_text(f"Searching for: {query}...")
     
     # Perform web search
