@@ -48,9 +48,9 @@ class CybersecurityAITester:
             print(f"❌ Failed - Error: {str(e)}")
             return False, {}
             
-    def test_person_search(self, name):
-        """Test person search API"""
-        print(f"\n🔍 Testing Person Search API for '{name}'...")
+    def test_enhanced_person_search(self, name):
+        """Test person search API with enhanced verification"""
+        print(f"\n🔍 Testing Enhanced Person Search API for '{name}'...")
         success, response = self.run_test(
             f"Person Search for '{name}'",
             "POST",
