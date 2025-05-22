@@ -391,13 +391,18 @@ async def help_command(update, context):
     await update.message.reply_text(
         "Here's what I can do for you:\n\n"
         "1. Answer cybersecurity questions\n"
-        "2. Search for information about a person or topic\n"
-        "3. Learn from datasets you upload through the web interface\n\n"
+        "2. Search for detailed information about a person\n"
+        "3. Search for cybersecurity topics on the web\n"
+        "4. Learn from datasets you upload through the web interface\n\n"
         "Commands:\n"
         "/start - Start the bot\n"
         "/help - Show this help message\n"
         "/search [query] - Search for information\n"
-        "Or just send me a message with your question!"
+        "/search person:John Smith - Get detailed info about a person\n\n"
+        "You can also just send me messages like:\n"
+        "• Any cybersecurity question\n"
+        "• name:John Smith - To get detailed information about a person\n"
+        "• person:Elon Musk - Alternative way to search for a person\n"
     )
 
 async def search_command(update, context):
