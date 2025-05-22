@@ -433,38 +433,211 @@ const SearchEngine = () => {
           
           {searchType === "person" && (
             <>
-              {results && results.name ? (
+              {results && results.personal_info ? (
                 <div>
-                  <h4 className="font-medium mb-4">Information about {results.name}</h4>
+                  <h4 className="font-medium mb-4 text-xl">Information about {results.personal_info.name}</h4>
                   
-                  {results.social_profiles && results.social_profiles.length > 0 && (
-                    <div className="mb-4">
-                      <h5 className="font-medium mb-2">Social Profiles</h5>
-                      <ul className="list-disc pl-5">
-                        {results.social_profiles.map((profile, index) => (
-                          <li key={index}>
-                            <a href={profile.href} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                              {profile.title}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
+                  {/* Summary Section */}
+                  {results.personal_info.summary && (
+                    <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+                      <h5 className="font-medium mb-2 text-blue-800">Summary</h5>
+                      <p>{results.personal_info.summary}</p>
                     </div>
                   )}
                   
-                  {results.professional_info && results.professional_info.length > 0 && (
-                    <div>
-                      <h5 className="font-medium mb-2">Professional Information</h5>
-                      <div className="space-y-2">
-                        {results.professional_info.map((info, index) => (
-                          <div key={index} className="p-2 border-b">
-                            <p className="font-medium">{info.title}</p>
-                            <p className="text-sm">{info.body}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    {/* Locations Section */}
+                    {results.personal_info.possible_locations && results.personal_info.possible_locations.length > 0 && (
+                      <div className="p-4 border rounded-lg">
+                        <h5 className="font-medium mb-2 flex items-center">
+                          <span className="mr-2">📍</span> Possible Locations
+                        </h5>
+                        <ul className="list-disc pl-5">
+                          {results.personal_info.possible_locations.map((location, index) => (
+                            <li key={index} className="mb-1">{location}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* Occupations Section */}
+                    {results.personal_info.possible_occupations && results.personal_info.possible_occupations.length > 0 && (
+                      <div className="p-4 border rounded-lg">
+                        <h5 className="font-medium mb-2 flex items-center">
+                          <span className="mr-2">💼</span> Possible Occupations
+                        </h5>
+                        <ul className="list-disc pl-5">
+                          {results.personal_info.possible_occupations.map((occupation, index) => (
+                            <li key={index} className="mb-1">{occupation}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* Education Section */}
+                    {results.personal_info.possible_education && results.personal_info.possible_education.length > 0 && (
+                      <div className="p-4 border rounded-lg">
+                        <h5 className="font-medium mb-2 flex items-center">
+                          <span className="mr-2">🎓</span> Possible Education
+                        </h5>
+                        <ul className="list-disc pl-5">
+                          {results.personal_info.possible_education.map((education, index) => (
+                            <li key={index} className="mb-1">{education}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* Social Media Section */}
+                    {results.personal_info.possible_social_media && results.personal_info.possible_social_media.length > 0 && (
+                      <div className="p-4 border rounded-lg">
+                        <h5 className="font-medium mb-2 flex items-center">
+                          <span className="mr-2">🔗</span> Social Media Presence
+                        </h5>
+                        <ul className="list-disc pl-5">
+                          {results.personal_info.possible_social_media.map((platform, index) => (
+                            <li key={index} className="mb-1">{platform}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    {/* Email Section */}
+                    {results.personal_info.possible_emails && results.personal_info.possible_emails.length > 0 && (
+                      <div className="p-4 border rounded-lg">
+                        <h5 className="font-medium mb-2 flex items-center">
+                          <span className="mr-2">📧</span> Possible Email Addresses
+                        </h5>
+                        <ul className="list-disc pl-5">
+                          {results.personal_info.possible_emails.map((email, index) => (
+                            <li key={index} className="mb-1">{email}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* Websites Section */}
+                    {results.personal_info.possible_websites && results.personal_info.possible_websites.length > 0 && (
+                      <div className="p-4 border rounded-lg">
+                        <h5 className="font-medium mb-2 flex items-center">
+                          <span className="mr-2">🌐</span> Possible Websites
+                        </h5>
+                        <ul className="list-disc pl-5">
+                          {results.personal_info.possible_websites.map((website, index) => (
+                            <li key={index} className="mb-1">
+                              <a href={website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                {website.length > 40 ? website.substring(0, 40) + "..." : website}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* Phone Numbers Section */}
+                    {results.personal_info.possible_phone_numbers && results.personal_info.possible_phone_numbers.length > 0 && (
+                      <div className="p-4 border rounded-lg">
+                        <h5 className="font-medium mb-2 flex items-center">
+                          <span className="mr-2">📱</span> Possible Phone Numbers
+                        </h5>
+                        <ul className="list-disc pl-5">
+                          {results.personal_info.possible_phone_numbers.map((phone, index) => (
+                            <li key={index} className="mb-1">{phone}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Social Profiles Section with Details */}
+                  {results.social_profiles && results.social_profiles.length > 0 && (
+                    <div className="mb-6">
+                      <h5 className="font-medium mb-4 flex items-center">
+                        <span className="mr-2">👤</span> Social Profiles
+                      </h5>
+                      <div className="space-y-4">
+                        {results.social_profiles.map((profile, index) => (
+                          <div key={index} className="p-4 border rounded-lg">
+                            <h6 className="font-medium mb-1">
+                              <a href={profile.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                {profile.platform ? `${profile.platform}: ` : ''}{profile.title}
+                              </a>
+                            </h6>
+                            <p className="text-sm text-gray-600">{profile.snippet}</p>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
+                  
+                  {/* Professional Info Section */}
+                  {results.professional_info && results.professional_info.length > 0 && (
+                    <div className="mb-6">
+                      <h5 className="font-medium mb-4 flex items-center">
+                        <span className="mr-2">👔</span> Professional Information
+                      </h5>
+                      <div className="space-y-4">
+                        {results.professional_info.map((info, index) => (
+                          <div key={index} className="p-4 border rounded-lg">
+                            <h6 className="font-medium mb-1">
+                              <a href={info.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                {info.title}
+                              </a>
+                            </h6>
+                            <p className="text-sm">{info.content.substring(0, 300)}...</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Articles Section */}
+                  {results.articles && results.articles.length > 0 && (
+                    <div className="mb-6">
+                      <h5 className="font-medium mb-4 flex items-center">
+                        <span className="mr-2">📰</span> Articles
+                      </h5>
+                      <div className="space-y-4">
+                        {results.articles.map((article, index) => (
+                          <div key={index} className="p-4 border rounded-lg">
+                            <h6 className="font-medium mb-1">
+                              <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                {article.title}
+                              </a>
+                            </h6>
+                            <p className="text-sm">{article.snippet}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Mentions Section */}
+                  {results.mentions && results.mentions.length > 0 && (
+                    <div className="mb-6">
+                      <h5 className="font-medium mb-4 flex items-center">
+                        <span className="mr-2">🔍</span> Other Mentions
+                      </h5>
+                      <div className="space-y-4">
+                        {results.mentions.map((mention, index) => (
+                          <div key={index} className="p-4 border rounded-lg">
+                            <h6 className="font-medium mb-1">
+                              <a href={mention.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                {mention.title}
+                              </a>
+                            </h6>
+                            <p className="text-sm">{mention.snippet}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="mt-6 p-4 bg-yellow-50 rounded-lg text-yellow-800 text-sm">
+                    ⚠️ Note: This information is automatically gathered from public web sources and may not be 100% accurate.
+                  </div>
                 </div>
               ) : (
                 <p>No information found for this person.</p>
