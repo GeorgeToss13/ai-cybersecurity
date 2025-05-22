@@ -441,25 +441,92 @@ async def handle_message(update, context):
     # Check if it's a name search
     if user_text.startswith("name:") or user_text.startswith("person:"):
         name = user_text.split(":", 1)[1].strip()
-        await update.message.reply_text(f"Searching for information about: {name}...")
+        await update.message.reply_text(f"Searching for detailed information about: {name}...")
         
         person_info = await person_search(name)
+        personal_info = person_info["personal_info"]
         
-        response = f"Information about {name}:\n\n"
+        # Create a comprehensive response with all details
+        response = f"📊 Detailed Information about {name}:\n\n"
         
-        if person_info["social_profiles"]:
-            response += "Social Profiles:\n"
-            for profile in person_info["social_profiles"]:
-                response += f"- {profile.get('title', 'Profile')}: {profile.get('href', 'No link')}\n"
+        # Add summary if available
+        if personal_info["summary"]:
+            response += f"📝 Summary:\n{personal_info['summary']}\n\n"
+        
+        # Add possible locations
+        if personal_info["possible_locations"]:
+            response += "📍 Possible Locations:\n"
+            for location in personal_info["possible_locations"]:
+                response += f"• {location}\n"
             response += "\n"
         
-        if person_info["professional_info"]:
-            response += "Professional Information:\n"
-            for info in person_info["professional_info"][:2]:
-                response += f"- {info.get('title', 'Information')}\n"
-                response += f"  {info.get('body', 'No details')[:100]}...\n\n"
+        # Add possible occupations
+        if personal_info["possible_occupations"]:
+            response += "💼 Possible Occupations:\n"
+            for occupation in personal_info["possible_occupations"]:
+                response += f"• {occupation}\n"
+            response += "\n"
         
-        await update.message.reply_text(response)
+        # Add possible education
+        if personal_info["possible_education"]:
+            response += "🎓 Possible Education:\n"
+            for education in personal_info["possible_education"]:
+                response += f"• {education}\n"
+            response += "\n"
+        
+        # Add social media profiles
+        if personal_info["possible_social_media"]:
+            response += "🔗 Social Media Presence:\n"
+            for platform in personal_info["possible_social_media"]:
+                response += f"• {platform}\n"
+            response += "\n"
+        
+        # Add possible emails
+        if personal_info["possible_emails"]:
+            response += "📧 Possible Email Addresses:\n"
+            for email in personal_info["possible_emails"]:
+                response += f"• {email}\n"
+            response += "\n"
+        
+        # Add possible websites
+        if personal_info["possible_websites"]:
+            response += "🌐 Possible Websites:\n"
+            for website in personal_info["possible_websites"]:
+                response += f"• {website}\n"
+            response += "\n"
+        
+        # Add possible phone numbers
+        if personal_info["possible_phone_numbers"]:
+            response += "📱 Possible Phone Numbers:\n"
+            for phone in personal_info["possible_phone_numbers"]:
+                response += f"• {phone}\n"
+            response += "\n"
+        
+        # Add professional information snippets
+        if person_info["professional_info"]:
+            response += "👔 Professional Information:\n"
+            for info in person_info["professional_info"][:2]:
+                response += f"• {info['title']}\n"
+                snippet = info['content'][:150] + "..." if len(info['content']) > 150 else info['content']
+                response += f"  {snippet}\n\n"
+        
+        # Add articles if available
+        if person_info["articles"]:
+            response += "📰 Articles:\n"
+            for article in person_info["articles"][:3]:
+                response += f"• {article['title']}\n"
+            response += "\n"
+        
+        # Add disclaimer
+        response += "⚠️ Note: This information is automatically gathered from public web sources and may not be 100% accurate."
+        
+        # Send response in chunks if it's too long
+        if len(response) > 4000:
+            chunks = [response[i:i+4000] for i in range(0, len(response), 4000)]
+            for chunk in chunks:
+                await update.message.reply_text(chunk)
+        else:
+            await update.message.reply_text(response)
         return
     
     # Otherwise treat as a cybersecurity question
