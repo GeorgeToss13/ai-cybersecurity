@@ -396,6 +396,10 @@ async def upload_dataset(
 @api_router.get("/datasets")
 async def get_datasets():
     all_datasets = await datasets.find().to_list(1000)
+    # Convert MongoDB ObjectId to string to make it JSON serializable
+    for dataset in all_datasets:
+        if "_id" in dataset:
+            dataset["_id"] = str(dataset["_id"])
     return all_datasets
 
 @api_router.post("/search/web")
