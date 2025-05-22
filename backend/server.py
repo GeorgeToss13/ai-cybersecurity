@@ -168,28 +168,183 @@ async def get_llm_response(prompt: str) -> str:
         return f"Error: {str(e)}"
 
 async def person_search(name: str) -> Dict[str, Any]:
-    """Search for information about a person"""
+    """Search for comprehensive information about a person"""
     results = {}
     
     # Search web for the person
-    web_results = await web_search(f"{name} profile information", 10)
+    web_results = await web_search(f"{name} profile information", 15)
     
-    # Extract relevant information (in a real app, you'd use more sophisticated extraction)
+    # Extract more detailed information
+    personal_info = {
+        "name": name,
+        "possible_locations": [],
+        "possible_occupations": [],
+        "possible_education": [],
+        "possible_social_media": [],
+        "possible_emails": [],
+        "possible_websites": [],
+        "possible_phone_numbers": [],
+        "summary": "",
+    }
+    
+    # Extract social media profiles with more details
     social_profiles = []
     professional_info = []
+    articles = []
+    mentions = []
+    
+    # Regular expressions for extracting data
+    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    phone_pattern = r'\b(\+\d{1,3}[-.\s]?)?(\(?\d{1,4}\)?[-.\s]?)?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}\b'
+    location_indicators = ["located in", "lives in", "based in", "from", "city of", "resident of"]
+    occupation_indicators = ["works as", "is a", "professional", "occupation", "job", "career", "position"]
+    education_indicators = ["studied at", "graduated from", "alumni", "university", "college", "school", "degree"]
     
     for result in web_results:
         title = result.get('title', '').lower()
-        if 'linkedin' in title or 'github' in title or 'twitter' in title or 'facebook' in title:
-            social_profiles.append(result)
+        body = result.get('body', '').lower()
+        url = result.get('href', '')
+        
+        # Categorize the result
+        if any(sm in title or sm in url for sm in ["linkedin", "github", "twitter", "facebook", "instagram"]):
+            # Extract platform name
+            platform = ""
+            for sm in ["linkedin", "github", "twitter", "facebook", "instagram"]:
+                if sm in title or sm in url:
+                    platform = sm.capitalize()
+                    break
+                    
+            social_profiles.append({
+                "platform": platform,
+                "title": result.get('title'),
+                "url": url,
+                "snippet": result.get('body', '')[:200] + "..."
+            })
+            
+            # Add to possible social media
+            if platform and platform not in personal_info["possible_social_media"]:
+                personal_info["possible_social_media"].append(platform)
+        
+        elif "profile" in title or "about" in title or "bio" in title:
+            professional_info.append({
+                "title": result.get('title'),
+                "url": url,
+                "content": result.get('body', '')
+            })
+        
+        elif "article by" in title or "written by" in title or "author" in title:
+            articles.append({
+                "title": result.get('title'),
+                "url": url,
+                "snippet": result.get('body', '')[:200] + "..."
+            })
+        
         else:
-            professional_info.append(result)
+            mentions.append({
+                "title": result.get('title'),
+                "url": url,
+                "snippet": result.get('body', '')[:200] + "..."
+            })
+        
+        # Extract potential emails
+        emails = re.findall(email_pattern, result.get('body', ''))
+        for email in emails:
+            if email not in personal_info["possible_emails"] and name.lower().split()[0] in email.lower():
+                personal_info["possible_emails"].append(email)
+        
+        # Extract potential phone numbers
+        phone_numbers = re.findall(phone_pattern, result.get('body', ''))
+        for phone in phone_numbers:
+            phone_str = ''.join(phone).strip()
+            if phone_str and phone_str not in personal_info["possible_phone_numbers"]:
+                personal_info["possible_phone_numbers"].append(phone_str)
+        
+        # Look for location information
+        for indicator in location_indicators:
+            if indicator in body:
+                idx = body.find(indicator) + len(indicator)
+                location_text = body[idx:idx+30].strip()
+                words = location_text.split()
+                potential_location = ' '.join(words[:3])  # Take up to 3 words after the indicator
+                
+                # Clean up the location text
+                potential_location = re.sub(r'[^\w\s,]', '', potential_location).strip()
+                if potential_location and len(potential_location) > 2 and potential_location not in personal_info["possible_locations"]:
+                    personal_info["possible_locations"].append(potential_location)
+        
+        # Look for occupation information
+        for indicator in occupation_indicators:
+            if indicator in body:
+                idx = body.find(indicator) + len(indicator)
+                occupation_text = body[idx:idx+30].strip()
+                words = occupation_text.split()
+                potential_occupation = ' '.join(words[:4])  # Take up to 4 words after the indicator
+                
+                # Clean up the occupation text
+                potential_occupation = re.sub(r'[^\w\s]', '', potential_occupation).strip()
+                if potential_occupation and len(potential_occupation) > 2 and potential_occupation not in personal_info["possible_occupations"]:
+                    personal_info["possible_occupations"].append(potential_occupation)
+        
+        # Look for education information
+        for indicator in education_indicators:
+            if indicator in body:
+                idx = body.find(indicator) + len(indicator)
+                education_text = body[idx:idx+40].strip()
+                words = education_text.split()
+                potential_education = ' '.join(words[:5])  # Take up to 5 words after the indicator
+                
+                # Clean up the education text
+                potential_education = re.sub(r'[^\w\s]', '', potential_education).strip()
+                if potential_education and len(potential_education) > 2 and potential_education not in personal_info["possible_education"]:
+                    personal_info["possible_education"].append(potential_education)
+        
+        # Extract websites that might belong to the person
+        if name.lower().replace(" ", "") in url.lower() or name.lower().split()[0] in url.lower():
+            if url not in personal_info["possible_websites"]:
+                personal_info["possible_websites"].append(url)
     
+    # Generate a summary if OpenAI is available
+    if openai_client:
+        try:
+            # Prepare a concise dataset for summary generation
+            summary_data = {
+                "name": name,
+                "social_profiles": [p["platform"] for p in social_profiles],
+                "possible_occupations": personal_info["possible_occupations"],
+                "possible_locations": personal_info["possible_locations"],
+                "possible_education": personal_info["possible_education"],
+                "articles_count": len(articles),
+                "mentions_count": len(mentions)
+            }
+            
+            summary_prompt = f"""Based on the following information about {name}, provide a brief professional summary (2-3 sentences):
+            
+            {json.dumps(summary_data, indent=2)}
+            
+            Summary:"""
+            
+            response = openai_client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are a professional summarizer. Create concise, factual summaries based only on the provided information."},
+                    {"role": "user", "content": summary_prompt}
+                ],
+                max_tokens=150
+            )
+            personal_info["summary"] = response.choices[0].message.content
+        except Exception as e:
+            logger.error(f"Error generating summary: {str(e)}")
+            personal_info["summary"] = f"Information gathered about {name} includes possible social profiles, professional details, and online mentions."
+    else:
+        personal_info["summary"] = f"Information gathered about {name} includes possible social profiles, professional details, and online mentions."
+    
+    # Assemble the results
     results = {
-        "name": name,
-        "social_profiles": social_profiles[:3],
-        "professional_info": professional_info[:5],
-        "raw_results": web_results
+        "personal_info": personal_info,
+        "social_profiles": social_profiles,
+        "professional_info": professional_info,
+        "articles": articles,
+        "mentions": mentions[:5],  # Limit to top 5 mentions
     }
     
     return results
