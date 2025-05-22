@@ -379,11 +379,19 @@ async def start_telegram_bot():
 async def start_command(update, context):
     """Handle /start command"""
     await update.message.reply_text(
-        "Welcome to the Cybersecurity AI Assistant! I can help you with cybersecurity questions, analyze datasets, and search for information.\n\n"
-        "Commands:\n"
+        "Welcome to the Cybersecurity AI Assistant! I can help you with cybersecurity questions, analyze datasets, search for information, and provide detailed profiles on individuals.\n\n"
+        "🔍 Key Features:\n"
+        "• Cybersecurity expertise and insights\n"
+        "• Detailed person information search\n"
+        "• Web search for security topics\n"
+        "• Dataset-based learning\n\n"
+        "Try these commands:\n"
         "/help - Show available commands\n"
-        "/search [query] - Search for information\n"
-        "Or just send me a message with your cybersecurity question!"
+        "/search vulnerability in Windows 11 - Search for cybersecurity information\n"
+        "/search person:John Smith - Get comprehensive details about a person\n\n"
+        "Or simply type:\n"
+        "• Any cybersecurity question\n"
+        "• name:John Smith - For detailed information about a person\n"
     )
 
 async def help_command(update, context):
