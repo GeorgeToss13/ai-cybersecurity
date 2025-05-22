@@ -274,9 +274,10 @@ def main():
     if web_search_success:
         print(f"\nWeb Search Results: {len(web_search_data.get('results', []))} items found")
     
-    person_search_success, person_search_data = tester.test_person_search()
-    if person_search_success:
-        print(f"\nPerson Search Results for: {person_search_data.get('name', 'Unknown')}")
+    # Test enhanced person search with well-known figures
+    test_names = ["Elon Musk", "Bill Gates"]
+    for name in test_names:
+        tester.test_person_search(name)
     
     # Test chat
     chat_success, chat_data = tester.test_chat()
