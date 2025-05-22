@@ -340,7 +340,7 @@ async def get_status():
         "app": "running",
         "telegram_bot": "configured" if TELEGRAM_BOT_TOKEN else "not configured",
         "openai": "configured" if OPENAI_API_KEY else "not configured",
-        "database": "connected" if db else "not connected"
+        "database": "connected" if client is not None else "not connected"
     }
     return status
 
